@@ -18,10 +18,33 @@ export default class Cube extends Component {
         super(props);
 
         this.onMouseDown = false;
+
+        // 方位角
+        this.angle1 = 0;
+        // 仰角
+        this.angle2 = 0;
     }
 
     componentDidMount() {
         this.renderCube();
+    }
+
+    cameraPosition(angle1, angle2) {
+        // console.log(angle1, angle2);
+
+        // 方位角
+        // angle1
+        // 仰角
+        // angle2
+        let x = CameraDistance * Math.sin(angle1) * Math.cos(angle2);
+        let y = CameraDistance * Math.sin(angle1) * Math.sin(angle2);
+        let z = CameraDistance * Math.cos(angle1);
+
+        // console.log(x, y, z);
+
+        return {
+            x, y, z
+        }
     }
 
     initThree() {
@@ -41,13 +64,15 @@ export default class Cube extends Component {
         let width = document.getElementById('canvas-frame').clientWidth;
         let height = document.getElementById('canvas-frame').clientHeight;
 
+        let {x, y, z} = this.cameraPosition(this.angle1, this.angle2);
+
         let camera = new THREE.PerspectiveCamera(75, width / height, 1, 10000);
-        camera.position.x = 0;
-        camera.position.y = CameraDistance;
-        camera.position.z = 0;
-        camera.up.x = 0;
-        camera.up.y = 0;
-        camera.up.z = 1;
+        camera.position.x = x;
+        camera.position.y = y;
+        camera.position.z = z;
+        // camera.up.x = 0;
+        // camera.up.y = 0;
+        // camera.up.z = 0;
         camera.lookAt(0, 0, 0);
 
         return camera;
@@ -69,13 +94,14 @@ export default class Cube extends Component {
         geometry.vertices.push( new THREE.Vector3( - 500, 0, 0 ) );
         geometry.vertices.push( new THREE.Vector3( 500, 0, 0 ) );
 
-        let lineX = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0x00ff00, opacity: 1 } ) );
+        // #ff0000
+        let lineX = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0xff0000, opacity: 1 } ) );
         scene.add(lineX);
-
-        let lineZ = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0xff0000, opacity: 1 } ) );
+        // #00ff00
+        let lineZ = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0x00ff00, opacity: 1 } ) );
         lineZ.rotation.y = 90 * Math.PI / 180;
         scene.add(lineZ);
-
+        // #0000ff
         let lineY = new THREE.Line( geometry, new THREE.LineBasicMaterial( { color: 0x0000ff, opacity: 1 } ) );
         lineY.rotation.z = 90 * Math.PI / 180;
         scene.add(lineY);
@@ -140,6 +166,10 @@ export default class Cube extends Component {
             }} onMouseDown={()=>{
                 console.log('onMouseDown');
                 this.onMouseDown = true;
+
+                this.drx = this.angle1;
+                this.dry = this.angle2;
+
             }} onMouseMove={(e)=>{
                 if (this.onMouseDown) {
                     console.log('onMouseMove');
@@ -151,19 +181,32 @@ export default class Cube extends Component {
                         // 向上为正，向下为负
                         let dy = this.clientY - clientY;
 
-                        let xR = 0 - dx * 2 * Math.PI / 1000000;
-                        let yR = 0 + dy * 2 * Math.PI / 1000000;
+                        if (this.drx >= 0 && this.dry >= 0) {
+                            // this.drx = this.angle1 + dx / window.innerWidth * 2 * Math.PI;
+                            // this.dry = this.angle2 - dy / window.innerHeight * 2 * Math.PI;
+                        } else if (this.drx >= 0) {
+                            
+                        } else if (this.dry >= 0) {
+                            
+                        } else {
 
-                        let yy = Math.sin(xR) * CameraDistance;
-                        let xx = Math.sin(yR) * CameraDistance;
-                        
-                        this.camera.rotation.y = yy;
-                        this.camera.rotation.x = xx;
-                        this.camera.rotation.z = Math.sqrt(CameraDistance*CameraDistance-yy*yy-xx*xx);
-                        // this.camera.rotation.z = 90 * Math.PI / 180;
+                        }
 
+                        this.drx = (this.angle1 + dx / window.innerWidth * 2 * Math.PI) % (2 * Math.PI);
+                        this.dry = (this.angle2 - dy / window.innerHeight * 2 * Math.PI) % (2 * Math.PI);
+
+                        console.log(this.drx, this.dry);
+
+                        let {x, y, z} = this.cameraPosition(this.drx, this.dry);
+
+                        this.camera.position.x = x;
+                        this.camera.position.y = y;
+                        this.camera.position.z = z;
+
+                        this.camera.lookAt(0, 0, 0);
+
+                        this.renderer.clear();
                         this.renderer.render(this.scene, this.camera);
-                        // this.camera.updateMatrix();
                     } else {
                         this.clientX = clientX;
                         this.clientY = clientY;
@@ -176,6 +219,9 @@ export default class Cube extends Component {
                 this.onMouseDown = false;
                 this.clientX = undefined;
                 this.clientY = undefined;
+
+                this.angle1 = this.drx;
+                this.angle2 = this.dry;
             }} >
 
             </div>
