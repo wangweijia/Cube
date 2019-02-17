@@ -41,6 +41,8 @@ export default class Cube extends Component {
         this.angle1 = Math.PI / 2;
         // 仰角
         this.angle2 = 0;
+
+        this.allObjects = [];
     }
 
     componentDidMount() {
@@ -131,13 +133,15 @@ export default class Cube extends Component {
             vertexColors: true,
         });
 
+        let cubeEdges = new THREE.EdgesGeometry(geometry2, 1);
+        let edgesMtl =  new THREE.LineBasicMaterial({color: 0x000000});
+
+        this.allObjects = [];
         Points.map((stratum)=>{
             stratum.map((row)=>{
                 row.map((item)=>{
                     let {x, y, z} = item;
-
-                    let cubeEdges = new THREE.EdgesGeometry(geometry2, 1);
-                    let edgesMtl =  new THREE.LineBasicMaterial({color: 0x000000});
+                    let newItem = {x, y, z};
                     // edgesMtl.depthTest = false; 深度测试，若开启则是边框透明的效果
                     let cubeLine = new THREE.LineSegments(cubeEdges, edgesMtl);
     
@@ -154,11 +158,16 @@ export default class Cube extends Component {
                         cube.geometry.faces[index].color.setHex(color);
                         cube.geometry.faces[index+1].color.setHex(color);
                     }
+
+                    newItem.cube = cube;
+                    this.allObjects.push(newItem);
             
                     scene.add(cube);
                 })
             })
         })
+
+        console.log(this.allObjects);
     }
 
     animation(scene, camera, renderer) {
@@ -166,6 +175,17 @@ export default class Cube extends Component {
         camera.position.x =camera.position.x +1;
         renderer.render(scene, camera);
         // requestAnimationFrame(()=>this.animation(scene, camera, renderer));
+    }
+
+    rotate(point, axle, direction) {
+        // direction 0:顺时针， 1:逆时针
+        let {x, y, z} = point;
+
+        let tempItems = [];
+        for (let index = 0; index < this.allObjects.length; index++) {
+            let element = this.allObjects[index];
+            
+        }
     }
 
     renderCube() {
