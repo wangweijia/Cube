@@ -13,6 +13,24 @@ const Colors = [
     0x00FFFF,
 ]
 
+const Points = [
+    [
+        [{x: -1, y: -1, z: -1}, {x: -1, y:  0, z: -1}, {x: -1, y:  1, z: -1}],
+        [{x:  0, y: -1, z: -1}, {x:  0, y:  0, z: -1}, {x:  0, y:  1, z: -1}],
+        [{x:  1, y: -1, z: -1}, {x:  1, y:  0, z: -1}, {x:  1, y:  1, z: -1}],
+    ], 
+    [
+        [{x: -1, y: -1, z:  0}, {x: -1, y:  0, z:  0}, {x: -1, y:  1, z:  0}],
+        [{x:  0, y: -1, z:  0}, {x:  0, y:  0, z:  0}, {x:  0, y:  1, z:  0}],
+        [{x:  1, y: -1, z:  0}, {x:  1, y:  0, z:  0}, {x:  1, y:  1, z:  0}],
+    ], 
+    [
+        [{x: -1, y: -1, z:  1}, {x: -1, y:  0, z:  1}, {x: -1, y:  1, z:  1}],
+        [{x:  0, y: -1, z:  1}, {x:  0, y:  0, z:  1}, {x:  0, y:  1, z:  1}],
+        [{x:  1, y: -1, z:  1}, {x:  1, y:  0, z:  1}, {x:  1, y:  1, z:  1}],
+    ], 
+]
+
 export default class Cube extends Component {
     constructor(props) {
         super(props);
@@ -20,7 +38,7 @@ export default class Cube extends Component {
         this.onMouseDown = false;
 
         // 方位角
-        this.angle1 = 0;
+        this.angle1 = Math.PI / 2;
         // 仰角
         this.angle2 = 0;
     }
@@ -108,28 +126,39 @@ export default class Cube extends Component {
     }
 
     initObject(scene) {
-        let geometry2 = new THREE.CubeGeometry(ItemWidth,ItemWidth,ItemWidth); 
+        let geometry2 = new THREE.CubeGeometry(ItemWidth, ItemWidth, ItemWidth); 
         let material2 = new THREE.MeshBasicMaterial({
-            vertexColors: THREE.FaceColors
+            vertexColors: true,
         });
 
-        // for (let index = 0; index < 12; index+=2) {
-        //     let color = Colors[index/2];
-        //     geometry2.faces[index].color = color;
-        //     geometry2.faces[index+1].color = color;
-        // }
+        Points.map((stratum)=>{
+            stratum.map((row)=>{
+                row.map((item)=>{
+                    let {x, y, z} = item;
 
-        let cube = new THREE.Mesh(geometry2, material2);
-        // cube.position.x = 300;
-        // cube.position.z = 300;
+                    let cubeEdges = new THREE.EdgesGeometry(geometry2, 1);
+                    let edgesMtl =  new THREE.LineBasicMaterial({color: 0x000000});
+                    // edgesMtl.depthTest = false; 深度测试，若开启则是边框透明的效果
+                    let cubeLine = new THREE.LineSegments(cubeEdges, edgesMtl);
+    
+                    let cube = new THREE.Mesh(geometry2, material2);
 
-        for (let index = 0; index < 12; index+=2) {
-            let color = Colors[index/2];
-            cube.geometry.faces[index].color.setHex(color);
-            cube.geometry.faces[index+1].color.setHex(color);
-        }
+                    cube.add(cubeLine);
 
-        scene.add(cube);
+                    cube.position.x = x * ItemWidth;
+                    cube.position.y = y * ItemWidth;
+                    cube.position.z = z * ItemWidth;
+            
+                    for (let index = 0; index < 12; index+=2) {
+                        let color = Colors[index/2];
+                        cube.geometry.faces[index].color.setHex(color);
+                        cube.geometry.faces[index+1].color.setHex(color);
+                    }
+            
+                    scene.add(cube);
+                })
+            })
+        })
     }
 
     animation(scene, camera, renderer) {
@@ -181,19 +210,9 @@ export default class Cube extends Component {
                         // 向上为正，向下为负
                         let dy = this.clientY - clientY;
 
-                        if (this.drx >= 0 && this.dry >= 0) {
-                            // this.drx = this.angle1 + dx / window.innerWidth * 2 * Math.PI;
-                            // this.dry = this.angle2 - dy / window.innerHeight * 2 * Math.PI;
-                        } else if (this.drx >= 0) {
-                            
-                        } else if (this.dry >= 0) {
-                            
-                        } else {
-
-                        }
-
                         this.drx = (this.angle1 + dx / window.innerWidth * 2 * Math.PI) % (2 * Math.PI);
-                        this.dry = (this.angle2 - dy / window.innerHeight * 2 * Math.PI) % (2 * Math.PI);
+                        this.dry = (this.angle2 + dx / window.innerWidth * 2 * Math.PI) % (2 * Math.PI);
+                        // this.dry = this.angle2 -  (Math.PI - dy / window.innerHeight * Math.PI);
 
                         console.log(this.drx, this.dry);
 
