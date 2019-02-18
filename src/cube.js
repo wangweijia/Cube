@@ -47,6 +47,8 @@ export default class Cube extends Component {
 
     componentDidMount() {
         this.renderCube();
+
+        this.rotate({x: 1, y: 1, z: 1}, 'x', 0);
     }
 
     cameraPosition(angle1, angle2) {
@@ -177,15 +179,95 @@ export default class Cube extends Component {
         // requestAnimationFrame(()=>this.animation(scene, camera, renderer));
     }
 
-    rotate(point, axle, direction) {
+    rotate(point, axle, direction=0) {
+        // axle：需要考虑的2个坐标轴
         // direction 0:顺时针， 1:逆时针
         let {x, y, z} = point;
 
         let tempItems = [];
         for (let index = 0; index < this.allObjects.length; index++) {
             let element = this.allObjects[index];
-            
+            if (element[axle] === point[axle]) {
+                tempItems.push(element);
+
+                if (tempItems.length >= 9) {
+                        break;
+                }
+            }
         }
+
+        // console.log(tempItems);
+        const newPoint = (a, b, r)=>{
+            let na = a*Math.cos(r)*ItemWidth- b*Math.sin(r)*ItemWidth;
+            let nb = a*Math.sin(r)*ItemWidth + b*Math.cos(r)*ItemWidth;
+
+            return {na, nb};
+        }
+
+        let count = 1;
+        const anime = (from, to, interval)=>{
+            let i = (to - from) / interval;
+
+            let v = count * i + from;
+            let endX, endY, endZ;
+            tempItems.map((item)=>{
+                if (axle == 'x') {
+                    item.cube.rotation.x = v;
+                    let {na, nb} = newPoint(item.y, item.z, v);
+                    item.cube.position.y = na;
+                    item.cube.position.z = nb;
+                    endX = item.x;
+                    endY = na;
+                    endZ = nb;
+                } else if (axle == 'y') {
+                    item.cube.rotation.y = v;
+                    let {na, nb} = newPoint(item.x, item.z, v);
+                    item.cube.position.x = na;
+                    item.cube.position.z = nb;
+                    endY = item.y;
+                    endX = na;
+                    endZ = nb;
+                } else if (axle == 'z') {
+                    item.cube.rotation.z = v;
+                    let {na, nb} = newPoint(item.x, item.y, v);
+                    item.cube.position.x = na;
+                    item.cube.position.y = nb;
+                    endZ = item.z;
+                    endX = na;
+                    endY = nb;
+                }
+            })
+    
+            this.renderer.render(this.scene, this.camera);
+            count ++;
+            if (count <= interval) {
+                setTimeout(() => {
+                    anime(from, to, interval);
+                }, 100);
+            } else {
+                tempItems.map((item)=>{
+                    item.x = endX;
+                    item.y = endY;
+                    item.z = endZ;
+                })
+            }
+
+            // for (let index = 0; index <= interval; index++) {
+            //     let v = index * i + from;
+                
+            //     tempItems.map((item)=>{
+            //         item.cube.rotation[axle] = v;
+        
+            //     })
+        
+            //     this.renderer.render(this.scene, this.camera);
+            // }
+        }
+
+        setTimeout(() => {
+            console.log('ccccccccccccccccc');
+            anime(0, Math.PI/2, 3);
+        }, 5000);
     }
 
     renderCube() {
