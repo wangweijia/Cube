@@ -264,29 +264,19 @@ export default class Cube extends Component {
                     anime(from, to, interval);
                 }, 100);
             } else {
+                console.log('././././././././././');
                 tempItems.map((item)=>{
                     item.x = endX;
                     item.y = endY;
                     item.z = endZ;
                 })
             }
-
-            // for (let index = 0; index <= interval; index++) {
-            //     let v = index * i + from;
-                
-            //     tempItems.map((item)=>{
-            //         item.cube.rotation[axle] = v;
-        
-            //     })
-        
-            //     this.renderer.render(this.scene, this.camera);
-            // }
         }
 
-        setTimeout(() => {
-            console.log('ccccccccccccccccc');
-            anime(0, -Math.PI/2, 3);
-        }, 5000);
+        let pi = direction === 0 ? Math.PI : - Math.PI;
+
+        anime(0, pi/2, 3);
+
     }
 
     renderCube() {
@@ -325,14 +315,10 @@ export default class Cube extends Component {
                 let intersects = this.raycaster.intersectObjects(this.scene.children);
 
                 if (intersects.length > 0) {
-                    console.log(intersects);
-
-                    // for ( var i = 0; i < intersects.length; i++ ) {
-                    //     let {faceIndex, object} = intersects[i];
-                    //     object.geometry.faces[faceIndex].color.setHex(0xf0f0f0);
-                    // }
                     let item = intersects[0];
                     this.cubeItem = item;
+
+                    console.log(item);
                 } else {
                     console.log('onMouseDown');
                     this.onMouseDown = true;
@@ -342,7 +328,6 @@ export default class Cube extends Component {
                 }
 
             }} onMouseMove={(e)=>{
-                console.log('onMouseMove');
                 let {clientX, clientY, pageX, pageY, screenX, screenY} = e; 
 
                 if (this.cubeItem !== undefined) {
@@ -404,7 +389,7 @@ export default class Cube extends Component {
                                 }
                             }
 
-                            let direction = maxDD > 0 ? 1 : 0;
+                            let direction = maxDD > 0 ? 0 : 1;
 
                             let {x, y, z} = this.cubeItem.point;
                             let itemx = parseInt(x/ItemWidth);
@@ -417,11 +402,12 @@ export default class Cube extends Component {
                             if (a1 > -1) {
                                 p.splice(a1, 1);
                             }
+                            console.log(p);
                             let a2 =  p.indexOf(maxK);
                             if (a2 > -1) {
                                 p.splice(a2, 1);
                             }
-
+                            console.log(p);
                             let axle = p[0];
 
                             this.cubeItem = undefined;
@@ -441,8 +427,6 @@ export default class Cube extends Component {
                         this.drx = (this.angle1 + dx / window.innerWidth * 2 * Math.PI) % (2 * Math.PI);
                         this.dry = (this.angle2 + dx / window.innerWidth * 2 * Math.PI) % (2 * Math.PI);
                         // this.dry = this.angle2 -  (Math.PI - dy / window.innerHeight * Math.PI);
-
-                        console.log(this.drx, this.dry);
 
                         let {x, y, z} = this.cameraPosition(this.drx, this.dry);
 
