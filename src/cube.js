@@ -22,19 +22,55 @@ const Colors = [
 
 const Points = [
     [
-        [{x: -1, y: -1, z: -1}, {x: -1, y:  0, z: -1}, {x: -1, y:  1, z: -1}],
-        [{x:  0, y: -1, z: -1}, {x:  0, y:  0, z: -1}, {x:  0, y:  1, z: -1}],
-        [{x:  1, y: -1, z: -1}, {x:  1, y:  0, z: -1}, {x:  1, y:  1, z: -1}],
+        [
+            {x: -1, y: -1, z: -1, colorPoint: {x: -1, y: -1, z: -1}}, 
+            {x: -1, y:  0, z: -1, colorPoint: {x: -1, y:  0, z: -1}}, 
+            {x: -1, y:  1, z: -1, colorPoint: {x: -1, y:  1, z: -1}}
+        ],
+        [
+            {x:  0, y: -1, z: -1, colorPoint: {x:  0, y: -1, z: -1}}, 
+            {x:  0, y:  0, z: -1, colorPoint: {x:  0, y:  0, z: -1}}, 
+            {x:  0, y:  1, z: -1, colorPoint: {x:  0, y:  1, z: -1}}
+        ],
+        [
+            {x:  1, y: -1, z: -1, colorPoint: {x:  1, y: -1, z: -1}}, 
+            {x:  1, y:  0, z: -1, colorPoint: {x:  1, y:  0, z: -1}}, 
+            {x:  1, y:  1, z: -1, colorPoint: {x:  1, y:  1, z: -1}}
+        ],
     ], 
     [
-        [{x: -1, y: -1, z:  0}, {x: -1, y:  0, z:  0}, {x: -1, y:  1, z:  0}],
-        [{x:  0, y: -1, z:  0}, {x:  0, y:  0, z:  0}, {x:  0, y:  1, z:  0}],
-        [{x:  1, y: -1, z:  0}, {x:  1, y:  0, z:  0}, {x:  1, y:  1, z:  0}],
+        [
+            {x: -1, y: -1, z:  0, colorPoint: {x: -1, y: -1, z:  0}}, 
+            {x: -1, y:  0, z:  0, colorPoint: {x: -1, y:  0, z:  0}}, 
+            {x: -1, y:  1, z:  0, colorPoint: {x: -1, y:  1, z:  0}}
+        ],
+        [
+            {x:  0, y: -1, z:  0, colorPoint: {x:  0, y: -1, z:  0}}, 
+            {x:  0, y:  0, z:  0, colorPoint: {x:  0, y:  0, z:  0}}, 
+            {x:  0, y:  1, z:  0, colorPoint: {x:  0, y:  1, z:  0}}
+        ],
+        [
+            {x:  1, y: -1, z:  0, colorPoint: {x:  1, y: -1, z:  0}}, 
+            {x:  1, y:  0, z:  0, colorPoint: {x:  1, y:  0, z:  0}}, 
+            {x:  1, y:  1, z:  0, colorPoint: {x:  1, y:  1, z:  0}}
+        ],
     ], 
     [
-        [{x: -1, y: -1, z:  1}, {x: -1, y:  0, z:  1}, {x: -1, y:  1, z:  1}],
-        [{x:  0, y: -1, z:  1}, {x:  0, y:  0, z:  1}, {x:  0, y:  1, z:  1}],
-        [{x:  1, y: -1, z:  1}, {x:  1, y:  0, z:  1}, {x:  1, y:  1, z:  1}],
+        [
+            {x: -1, y: -1, z:  1, colorPoint: {x: -1, y: -1, z:  1}}, 
+            {x: -1, y:  0, z:  1, colorPoint: {x: -1, y:  0, z:  1}}, 
+            {x: -1, y:  1, z:  1, colorPoint: {x: -1, y:  1, z:  1}}
+        ],
+        [
+            {x:  0, y: -1, z:  1, colorPoint: {x:  0, y: -1, z:  1}}, 
+            {x:  0, y:  0, z:  1, colorPoint: {x:  0, y:  0, z:  1}}, 
+            {x:  0, y:  1, z:  1, colorPoint: {x:  0, y:  1, z:  1}}
+        ],
+        [
+            {x:  1, y: -1, z:  1, colorPoint: {x:  1, y: -1, z:  1}}, 
+            {x:  1, y:  0, z:  1, colorPoint: {x:  1, y:  0, z:  1}}, 
+            {x:  1, y:  1, z:  1, colorPoint: {x:  1, y:  1, z:  1}}
+        ],
     ], 
 ]
 
@@ -114,6 +150,7 @@ export default class Cube extends Component {
 
     initScene() {
         let scene = new THREE.Scene();
+        scene.autoUpdate = true;
         return scene;
     }
 
@@ -150,21 +187,20 @@ export default class Cube extends Component {
         let cubeEdges = new THREE.EdgesGeometry(geometry2, 1);
         let edgesMtl =  new THREE.LineBasicMaterial({color: 0x000000});
 
-        this.allObjects = [];
-
-        const oneItem = (item) => {
-            let {x, y, z} = item;
-            let newItem = {x, y, z};
+        const oneItem = (item, needPush) => {
+            let {x, y, z, colorPoint} = item;
+            let newItem = {x, y, z, colorPoint};
             // edgesMtl.depthTest = false; 深度测试，若开启则是边框透明的效果
             let cubeLine = new THREE.LineSegments(cubeEdges, edgesMtl);
     
             let cube = new THREE.Mesh(geometry2, material2);
+            cube.matrixAutoUpdate = true;
     
             cube.add(cubeLine);
     
-            cube.position.x = x * ItemWidth;
-            cube.position.y = y * ItemWidth;
-            cube.position.z = z * ItemWidth;
+            cube.position.x = colorPoint.x * ItemWidth;
+            cube.position.y = colorPoint.y * ItemWidth;
+            cube.position.z = colorPoint.z * ItemWidth;
     
             for (let index = 0; index < 12; index+=2) {
                 let color = Colors[index/2];
@@ -173,20 +209,33 @@ export default class Cube extends Component {
             }
     
             newItem.cube = cube;
-            this.allObjects.push(newItem);
+            if (needPush) {
+                this.allObjects.push(newItem);
+            }
     
             scene.add(cube);
         }
 
-        // oneItem({x: 0, y: 0, z: 0});
+        if (this.allObjects === undefined || this.allObjects.length === 0) {
+            this.allObjects = [];
 
-        Points.map((stratum)=>{
-            stratum.map((row)=>{
-                row.map((item)=>{
-                    oneItem(item);
+            Points.map((stratum)=>{
+                stratum.map((row)=>{
+                    row.map((item)=>{
+                        oneItem(item, true);
+                    })
                 })
             })
-        })
+        } else {
+            this.allObjects.map((item)=>{
+                oneItem(item, false);
+            })
+        }
+
+
+
+        // oneItem({x: 0, y: 0, z: 0});
+
 
 
         console.log(this.allObjects);
@@ -202,6 +251,8 @@ export default class Cube extends Component {
     rotate(point, axle, direction=0) {
         // axle：需要考虑的2个坐标轴
         // direction 0:顺时针， 1:逆时针
+
+        console.log(point, axle, direction);
 
         let tempItems = [];
         for (let index = 0; index < this.allObjects.length; index++) {
@@ -220,6 +271,8 @@ export default class Cube extends Component {
             let na = a*Math.cos(r)*ItemWidth- b*Math.sin(r)*ItemWidth;
             let nb = a*Math.sin(r)*ItemWidth + b*Math.cos(r)*ItemWidth;
 
+            console.log({na, nb});
+
             return {na, nb};
         }
 
@@ -228,48 +281,47 @@ export default class Cube extends Component {
             let i = (to - from) / interval;
 
             let v = count * i + from;
-            let endX, endY, endZ;
+            let endPoints = [];
             tempItems.map((item)=>{
                 if (axle == 'x') {
-                    item.cube.rotation.x = v;
+                    item.cube.rotation.x = item.cube.rotation.x+i;
                     let {na, nb} = newPoint(item.y, item.z, v);
                     item.cube.position.y = na;
                     item.cube.position.z = nb;
-                    endX = item.x;
-                    endY = na;
-                    endZ = nb;
+                    endPoints.push({x: item.x, y: na/ItemWidth, z: nb/ItemWidth });
                 } else if (axle == 'y') {
-                    item.cube.rotation.y = v;
+                    item.cube.rotation.y = item.cube.rotation.y+i;
                     let {na, nb} = newPoint(item.x, item.z, v);
                     item.cube.position.x = na;
                     item.cube.position.z = nb;
-                    endY = item.y;
-                    endX = na;
-                    endZ = nb;
+                    endPoints.push({x: na/ItemWidth, y: item.y, z: nb/ItemWidth });
                 } else if (axle == 'z') {
-                    item.cube.rotation.z = v;
+                    item.cube.rotation.z = item.cube.rotation.z+i;
                     let {na, nb} = newPoint(item.x, item.y, v);
                     item.cube.position.x = na;
                     item.cube.position.y = nb;
-                    endZ = item.z;
-                    endX = na;
-                    endY = nb;
+                    endPoints.push({x: na/ItemWidth, y: nb/ItemWidth, z: item.z });
                 }
             })
     
-            this.renderer.render(this.scene, this.camera);
             count ++;
             if (count <= interval) {
+                this.renderer.render(this.scene, this.camera);
                 setTimeout(() => {
                     anime(from, to, interval);
                 }, 100);
             } else {
-                console.log('././././././././././');
-                tempItems.map((item)=>{
-                    item.x = endX;
-                    item.y = endY;
-                    item.z = endZ;
-                })
+                tempItems.map((item, index)=>{
+                    item.x = endPoints[index].x;
+                    item.y = endPoints[index].y;
+                    item.z = endPoints[index].z;
+                });
+
+                this.renderer.clear();
+                // this.initScene();
+                // this.initObject(this.scene);
+                this.renderer.render(this.scene, this.camera);
+
             }
         }
 
@@ -282,21 +334,18 @@ export default class Cube extends Component {
     renderCube() {
         this.initRaycaster();
         
-        let scene = this.initScene();
-        this.scene = scene;
+        this.scene = this.initScene();
 
-        let camera = this.initCamera();
-        this.camera = camera;
+        this.camera = this.initCamera();
 
-        let renderer = this.initThree();
-        this.renderer = renderer;
+        this.renderer = this.initThree();
 
-        this.initLight(scene);
-        this.initCoordinate(scene);
-        this.initObject(scene);
+        this.initLight(this.scene);
+        this.initCoordinate(this.scene);
+        this.initObject(this.scene);
 
 
-        this.animation(scene, camera, renderer);
+        this.animation(this.scene, this.camera, this.renderer);
     }
 
     render() {
@@ -318,7 +367,7 @@ export default class Cube extends Component {
                     let item = intersects[0];
                     this.cubeItem = item;
 
-                    console.log(item);
+                    // console.log(item);
                 } else {
                     console.log('onMouseDown');
                     this.onMouseDown = true;
@@ -375,21 +424,26 @@ export default class Cube extends Component {
                             }
                         }
 
-                        console.log(maxDD);
-
                         if (Math.abs(maxDD) > ItemWidth/2) {
-                            let normal = this.cubeItem.face.normal;
+                            // let normal = this.cubeItem.face.normal;
+                            let points = this.cubeItem.point;
                             let normalK = undefined;
                             for (let index = 0; index < p.length; index++) {
                                 const aKey = p[index];
-                                let v = normal[aKey];
-                                if (v !== 0) {
+                                let v = points[aKey];
+                                if (Math.abs(v) >= 1.5*ItemWidth) {
                                     normalK = aKey;
                                     break;
                                 }
                             }
 
-                            let direction = maxDD > 0 ? 0 : 1;
+                            let direction = 0;
+                            if (points[normalK] > 0) {
+                                direction = maxDD > 0 ? 0 : 1;
+                            } else {
+                                direction = maxDD > 0 ? 1 : 0;
+                            }
+                            
 
                             let {x, y, z} = this.cubeItem.point;
                             let itemx = parseInt(x/ItemWidth);
@@ -402,17 +456,15 @@ export default class Cube extends Component {
                             if (a1 > -1) {
                                 p.splice(a1, 1);
                             }
-                            console.log(p);
                             let a2 =  p.indexOf(maxK);
                             if (a2 > -1) {
                                 p.splice(a2, 1);
                             }
-                            console.log(p);
                             let axle = p[0];
 
                             this.cubeItem = undefined;
 
-                            console.log(point, axle, direction);
+                            // console.log(point, axle, direction);
 
                             this.rotate(point, axle, direction);
                         }
