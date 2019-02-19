@@ -179,6 +179,8 @@ export default class Cube extends Component {
     }
 
     initObject(scene) {
+        console.log('---------------initObject(scene)');
+
         let geometry2 = new THREE.CubeGeometry(ItemWidth, ItemWidth, ItemWidth); 
         let material2 = new THREE.MeshBasicMaterial({
             vertexColors: true,
@@ -258,6 +260,8 @@ export default class Cube extends Component {
             }
         }
 
+        console.log({...tempItems});
+
         const newPoint = (a, b, r)=>{
             let na = a*Math.cos(r)*ItemWidth - b*Math.sin(r)*ItemWidth;
             let nb = a*Math.sin(r)*ItemWidth + b*Math.cos(r)*ItemWidth;
@@ -279,17 +283,15 @@ export default class Cube extends Component {
             tempItems.map((item)=>{
                 if (axle == 'x') {
                     axis = new THREE.Vector3(1,0,0); 
-                    let {na, nb} = newPoint(item.z, item.y, v);
-                    item.cube.position.y = nb;
-                    item.cube.position.z = na;
-                    endPoints.push({x: item.x, y: nb/ItemWidth, z: na/ItemWidth });
+                    let {na, nb} = newPoint(item.y, item.z, v);
+                    item.cube.position.y = na;
+                    item.cube.position.z = nb;
+                    endPoints.push({x: item.x, y: na/ItemWidth, z: nb/ItemWidth });
                 } else if (axle == 'y') {
                     axis = new THREE.Vector3(0,1,0); 
                     let {na, nb} = newPoint(item.z, item.x, v);
                     item.cube.position.x = nb;
                     item.cube.position.z = na;
-                    console.log(nb, na);
-                    console.log({x: nb/ItemWidth, y: item.y, z: na/ItemWidth });
                     endPoints.push({x: nb/ItemWidth, y: item.y, z: na/ItemWidth });
                 } else if (axle == 'z') {
                     axis = new THREE.Vector3(0,0,1); 
@@ -317,8 +319,9 @@ export default class Cube extends Component {
                     item.y = parseInt(endPoints[index].y.toFixed(1));
                     item.z = parseInt(endPoints[index].z.toFixed(1));
                 });
+                console.log(tempItems);
 
-                this.renderer.clear();
+                // this.renderer.clear();
                 this.renderer.render(this.scene, this.camera);
 
             }
@@ -326,7 +329,7 @@ export default class Cube extends Component {
 
         let pi = direction === 0 ? Math.PI : - Math.PI;
 
-        anime(0, pi/2, 3);
+        anime(0, pi/2, 30);
 
     }
 
