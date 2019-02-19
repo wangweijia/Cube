@@ -258,12 +258,9 @@ export default class Cube extends Component {
             }
         }
 
-        // console.log(tempItems);
         const newPoint = (a, b, r)=>{
-            let na = a*Math.cos(r)*ItemWidth- b*Math.sin(r)*ItemWidth;
+            let na = a*Math.cos(r)*ItemWidth - b*Math.sin(r)*ItemWidth;
             let nb = a*Math.sin(r)*ItemWidth + b*Math.cos(r)*ItemWidth;
-
-            console.log({na, nb});
 
             return {na, nb};
         }
@@ -282,21 +279,20 @@ export default class Cube extends Component {
             tempItems.map((item)=>{
                 if (axle == 'x') {
                     axis = new THREE.Vector3(1,0,0); 
-                    // item.cube.rotation.x = item.cube.rotation.x+i;
-                    let {na, nb} = newPoint(item.y, item.z, v);
-                    item.cube.position.y = na;
-                    item.cube.position.z = nb;
-                    endPoints.push({x: item.x, y: na/ItemWidth, z: nb/ItemWidth });
+                    let {na, nb} = newPoint(item.z, item.y, v);
+                    item.cube.position.y = nb;
+                    item.cube.position.z = na;
+                    endPoints.push({x: item.x, y: nb/ItemWidth, z: na/ItemWidth });
                 } else if (axle == 'y') {
                     axis = new THREE.Vector3(0,1,0); 
-                    // item.cube.rotation.y = item.cube.rotation.y+i;
-                    let {na, nb} = newPoint(item.x, item.z, v);
-                    item.cube.position.x = na;
-                    item.cube.position.z = nb;
-                    endPoints.push({x: na/ItemWidth, y: item.y, z: nb/ItemWidth });
+                    let {na, nb} = newPoint(item.z, item.x, v);
+                    item.cube.position.x = nb;
+                    item.cube.position.z = na;
+                    console.log(nb, na);
+                    console.log({x: nb/ItemWidth, y: item.y, z: na/ItemWidth });
+                    endPoints.push({x: nb/ItemWidth, y: item.y, z: na/ItemWidth });
                 } else if (axle == 'z') {
                     axis = new THREE.Vector3(0,0,1); 
-                    // item.cube.rotation.z = item.cube.rotation.z+i;
                     let {na, nb} = newPoint(item.x, item.y, v);
                     item.cube.position.x = na;
                     item.cube.position.y = nb;
@@ -304,7 +300,7 @@ export default class Cube extends Component {
                 }
 
                 rotWorldMatrix.makeRotationAxis(axis.normalize(), i);
-                rotWorldMatrix.multiply(item.cube.matrix);                // pre-multiply
+                rotWorldMatrix.multiply(item.cube.matrix);
                 item.cube.matrix = rotWorldMatrix;
                 item.cube.rotation.setFromRotationMatrix(item.cube.matrix);
             })
@@ -317,14 +313,12 @@ export default class Cube extends Component {
                 }, 100);
             } else {
                 tempItems.map((item, index)=>{
-                    item.x = endPoints[index].x;
-                    item.y = endPoints[index].y;
-                    item.z = endPoints[index].z;
+                    item.x = parseInt(endPoints[index].x.toFixed(1));
+                    item.y = parseInt(endPoints[index].y.toFixed(1));
+                    item.z = parseInt(endPoints[index].z.toFixed(1));
                 });
 
                 this.renderer.clear();
-                // this.initScene();
-                // this.initObject(this.scene);
                 this.renderer.render(this.scene, this.camera);
 
             }
