@@ -231,14 +231,6 @@ export default class Cube extends Component {
                 oneItem(item, false);
             })
         }
-
-
-
-        // oneItem({x: 0, y: 0, z: 0});
-
-
-
-        console.log(this.allObjects);
     }
 
     animation(scene, camera, renderer) {
@@ -278,30 +270,43 @@ export default class Cube extends Component {
 
         let count = 1;
         const anime = (from, to, interval)=>{
+
+            // let axis = new THREE.Vector3(1,1,0);    //创建一个三维向量
+            let axis = undefined;
+            let rotWorldMatrix = new THREE.Matrix4();      //创建一个4*4矩阵
+
             let i = (to - from) / interval;
 
             let v = count * i + from;
             let endPoints = [];
             tempItems.map((item)=>{
                 if (axle == 'x') {
-                    item.cube.rotation.x = item.cube.rotation.x+i;
+                    axis = new THREE.Vector3(1,0,0); 
+                    // item.cube.rotation.x = item.cube.rotation.x+i;
                     let {na, nb} = newPoint(item.y, item.z, v);
                     item.cube.position.y = na;
                     item.cube.position.z = nb;
                     endPoints.push({x: item.x, y: na/ItemWidth, z: nb/ItemWidth });
                 } else if (axle == 'y') {
-                    item.cube.rotation.y = item.cube.rotation.y+i;
+                    axis = new THREE.Vector3(0,1,0); 
+                    // item.cube.rotation.y = item.cube.rotation.y+i;
                     let {na, nb} = newPoint(item.x, item.z, v);
                     item.cube.position.x = na;
                     item.cube.position.z = nb;
                     endPoints.push({x: na/ItemWidth, y: item.y, z: nb/ItemWidth });
                 } else if (axle == 'z') {
-                    item.cube.rotation.z = item.cube.rotation.z+i;
+                    axis = new THREE.Vector3(0,0,1); 
+                    // item.cube.rotation.z = item.cube.rotation.z+i;
                     let {na, nb} = newPoint(item.x, item.y, v);
                     item.cube.position.x = na;
                     item.cube.position.y = nb;
                     endPoints.push({x: na/ItemWidth, y: nb/ItemWidth, z: item.z });
                 }
+
+                rotWorldMatrix.makeRotationAxis(axis.normalize(), i);
+                rotWorldMatrix.multiply(item.cube.matrix);                // pre-multiply
+                item.cube.matrix = rotWorldMatrix;
+                item.cube.rotation.setFromRotationMatrix(item.cube.matrix);
             })
     
             count ++;
