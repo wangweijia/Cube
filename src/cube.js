@@ -247,9 +247,11 @@ export default class Cube extends Component {
         // axle：需要考虑的2个坐标轴
         // direction 0:顺时针， 1:逆时针
 
-        console.log(point, axle, direction);
-
         let tempItems = [];
+
+
+        console.log('./././././././', point[axle]);
+
         for (let index = 0; index < this.allObjects.length; index++) {
             let element = this.allObjects[index];
             if (element[axle] === point[axle]) {
@@ -260,8 +262,6 @@ export default class Cube extends Component {
                 }
             }
         }
-
-        console.log({...tempItems});
 
         const newPoint = (a, b, r)=>{
             let na = a*Math.cos(r)*ItemWidth - b*Math.sin(r)*ItemWidth;
@@ -322,8 +322,6 @@ export default class Cube extends Component {
                     item.y = parseInt(endPoints[index].y.toFixed(1));
                     item.z = parseInt(endPoints[index].z.toFixed(1));
                 });
-                console.log(tempItems);
-
                 // this.renderer.clear();
                 this.renderer.render(this.scene, this.camera);
 
@@ -332,7 +330,7 @@ export default class Cube extends Component {
 
         let pi = direction === 0 ? Math.PI : - Math.PI;
 
-        anime(0, pi/2, 30);
+        anime(0, pi/2, 3);
 
     }
 
@@ -372,9 +370,8 @@ export default class Cube extends Component {
                     let item = intersects[0];
                     this.cubeItem = item;
 
-                    // console.log(item);
+                    console.log(this.cubeItem);
                 } else {
-                    console.log('onMouseDown');
                     this.onMouseDown = true;
 
                     this.drx = this.angle1;
@@ -436,11 +433,14 @@ export default class Cube extends Component {
                             for (let index = 0; index < p.length; index++) {
                                 const aKey = p[index];
                                 let v = points[aKey];
-                                if (Math.abs(v) >= 1.5*ItemWidth) {
+                                // console.log(Math.abs(v));
+                                if (Math.abs(v) >= (1.5*ItemWidth-0.1)) {
                                     normalK = aKey;
                                     break;
                                 }
                             }
+
+                            console.log(normalK, maxK);
 
                             let direction = 0;
                             if (points[normalK] > 0) {
@@ -448,12 +448,22 @@ export default class Cube extends Component {
                             } else {
                                 direction = maxDD > 0 ? 1 : 0;
                             }
-                            
+
+                            direction = maxDD > 0 ? 0 : 1;
 
                             let {x, y, z} = this.cubeItem.point;
-                            let itemx = parseInt(x/ItemWidth);
-                            let itemy = parseInt(y/ItemWidth);
-                            let itemz = parseInt(z/ItemWidth);
+
+                            const newPoint = (p) => {
+                                let a = parseInt((Math.abs(p) + ItemWidth/2 - 1) / ItemWidth);
+                                if (p >= 0) {
+                                    return a
+                                } else {
+                                    return -a;
+                                }
+                            }
+                            let itemx = newPoint(x);
+                            let itemy = newPoint(y);
+                            let itemz = newPoint(z);
 
                             let point = {x: itemx, y: itemy, z: itemz};
 
