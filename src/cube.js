@@ -196,7 +196,8 @@ export default class Cube extends Component {
             let cubeLine = new THREE.LineSegments(cubeEdges, edgesMtl);
     
             let cube = new THREE.Mesh(geometry2, material2);
-            cube.matrixAutoUpdate = true;
+            cube.matrix = new THREE.Matrix4();
+            // cube.matrixAutoUpdate = true;
     
             cube.add(cubeLine);
     
@@ -272,28 +273,27 @@ export default class Cube extends Component {
         let count = 1;
         const anime = (from, to, interval)=>{
 
-            // let axis = new THREE.Vector3(1,1,0);    //创建一个三维向量
             let axis = undefined;
-            let rotWorldMatrix = new THREE.Matrix4();      //创建一个4*4矩阵
+            let rotWorldMatrix = undefined;
 
             let i = (to - from) / interval;
 
             let v = count * i + from;
             let endPoints = [];
             tempItems.map((item)=>{
-                if (axle == 'x') {
+                if (axle === 'x') {
                     axis = new THREE.Vector3(1,0,0); 
                     let {na, nb} = newPoint(item.y, item.z, v);
                     item.cube.position.y = na;
                     item.cube.position.z = nb;
                     endPoints.push({x: item.x, y: na/ItemWidth, z: nb/ItemWidth });
-                } else if (axle == 'y') {
+                } else if (axle === 'y') {
                     axis = new THREE.Vector3(0,1,0); 
                     let {na, nb} = newPoint(item.z, item.x, v);
                     item.cube.position.x = nb;
                     item.cube.position.z = na;
                     endPoints.push({x: nb/ItemWidth, y: item.y, z: na/ItemWidth });
-                } else if (axle == 'z') {
+                } else if (axle === 'z') {
                     axis = new THREE.Vector3(0,0,1); 
                     let {na, nb} = newPoint(item.x, item.y, v);
                     item.cube.position.x = na;
@@ -301,9 +301,12 @@ export default class Cube extends Component {
                     endPoints.push({x: na/ItemWidth, y: nb/ItemWidth, z: item.z });
                 }
 
+                rotWorldMatrix = new THREE.Matrix4();
                 rotWorldMatrix.makeRotationAxis(axis.normalize(), i);
                 rotWorldMatrix.multiply(item.cube.matrix);
                 item.cube.matrix = rotWorldMatrix;
+
+                // item.rotWorldMatrix = rotWorldMatrix;
                 item.cube.rotation.setFromRotationMatrix(item.cube.matrix);
             })
     
