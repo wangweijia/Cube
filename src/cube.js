@@ -427,29 +427,16 @@ export default class Cube extends Component {
                         }
 
                         if (Math.abs(maxDD) > ItemWidth/2) {
-                            // let normal = this.cubeItem.face.normal;
                             let points = this.cubeItem.point;
                             let normalK = undefined;
                             for (let index = 0; index < p.length; index++) {
                                 const aKey = p[index];
                                 let v = points[aKey];
-                                // console.log(Math.abs(v));
                                 if (Math.abs(v) >= (1.5*ItemWidth-0.1)) {
                                     normalK = aKey;
                                     break;
                                 }
                             }
-
-                            console.log(normalK, maxK);
-
-                            let direction = 0;
-                            if (points[normalK] > 0) {
-                                direction = maxDD > 0 ? 0 : 1;
-                            } else {
-                                direction = maxDD > 0 ? 1 : 0;
-                            }
-
-                            direction = maxDD > 0 ? 0 : 1;
 
                             let {x, y, z} = this.cubeItem.point;
 
@@ -479,7 +466,32 @@ export default class Cube extends Component {
 
                             this.cubeItem = undefined;
 
-                            // console.log(point, axle, direction);
+                            console.log(normalK, maxK, point);
+
+                            let direction = 0;
+
+                            if (axle === 'x') {
+                                let normalKV = point[normalK];
+                                if ( (normalK === 'y' && normalKV < 0) || (normalK === 'z' && normalKV > 0) ) {
+                                    direction = maxDD > 0 ? 1 : 0;
+                                } else {
+                                    direction = maxDD > 0 ? 0 : 1;
+                                }
+                            } else if (axle === 'y') {
+                                let normalKV = point[normalK];
+                                if ( (normalK === 'z' && normalKV < 0) || (normalK === 'x' && normalKV > 0) ) {
+                                    direction = maxDD > 0 ? 1 : 0;
+                                } else {
+                                    direction = maxDD > 0 ? 0 : 1;
+                                }
+                            } else if (axle === 'z') {
+                                let normalKV = point[normalK];
+                                if ( (normalK === 'x' && normalKV < 0) || (normalK === 'y' && normalKV > 0) ) {
+                                    direction = maxDD > 0 ? 1 : 0;
+                                } else {
+                                    direction = maxDD > 0 ? 0 : 1;
+                                }
+                            }
 
                             this.rotate(point, axle, direction);
                         }
