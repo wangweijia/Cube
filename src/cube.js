@@ -343,9 +343,13 @@ export default class Cube extends Component {
     }
 
     _onMouseDown = (e)=>{
+        let {clientX, clientY} = e; 
+        this.clientX = clientX;
+        this.clientY = clientY;
+
         //将html坐标系转化为webgl坐标系，并确定鼠标点击位置
-        this.mouse.x =  e.clientX / this.renderer.domElement.clientWidth*2-1;
-        this.mouse.y =  -(e.clientY / this.renderer.domElement.clientHeight*2)+1;
+        this.mouse.x =  clientX / this.renderer.domElement.clientWidth*2-1;
+        this.mouse.y =  -(clientY / this.renderer.domElement.clientHeight*2)+1;
         //以camera为z坐标，确定所点击物体的3D空间位置
         this.raycaster.setFromCamera(this.mouse, this.camera);
         //确定所点击位置上的物体数量
@@ -485,9 +489,12 @@ export default class Cube extends Component {
                 // 向上为正，向下为负
                 let dy = this.clientY - clientY;
 
-                this.drx = (this.angle1 + dx / window.innerWidth * 2 * Math.PI) % (2 * Math.PI);
-                this.dry = (this.angle2 + dx / window.innerWidth * 2 * Math.PI) % (2 * Math.PI);
-                // this.dry = this.angle2 -  (Math.PI - dy / window.innerHeight * Math.PI);
+                // console.log('hfghjkfghjkfghjkfghjkfghjk');
+                // console.log(`${this.angle1} + ${dx} / window.innerWidth * 2 * Math.PI = ${this.angle1 + dx / window.innerWidth * 2 * Math.PI}`);
+                // console.log(`${this.angle2} + ${dy} / window.innerWidth * 2 * Math.PI = ${this.angle2 + dy / window.innerWidth * 2 * Math.PI}`);
+
+                this.drx = (this.angle1 + dx / window.innerWidth * 2 * Math.PI);
+                this.dry = (this.angle2 + dy / window.innerHeight * 2 * Math.PI);
 
                 let {x, y, z} = this.cameraPosition(this.drx, this.dry);
 
@@ -500,13 +507,6 @@ export default class Cube extends Component {
                 this.renderer.clear();
                 this.renderer.render(this.scene, this.camera);
             }
-            // this.clientX = clientX;
-            // this.clientY = clientY;
-        }
-
-        if (this.clientX == undefined || this.clientY == undefined) {
-            this.clientX = clientX;
-            this.clientY = clientY;
         }
     }
 
@@ -516,10 +516,13 @@ export default class Cube extends Component {
         this.clientX = undefined;
         this.clientY = undefined;
 
-        if (this.drx) {
+        this.ccccccc = true;
+
+
+        if (this.drx !== undefined) {
             this.angle1 = this.drx;
         }
-        if (this.dry) {
+        if (this.dry !== undefined) {
             this.angle2 = this.dry;
         }
     }
