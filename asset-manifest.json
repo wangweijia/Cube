@@ -1,13 +1,13 @@
 {
-  "main.css": "/Cube.git/static/css/main.85a4839c.chunk.css",
-  "main.js": "/Cube.git/static/js/main.b023e939.chunk.js",
-  "main.js.map": "/Cube.git/static/js/main.b023e939.chunk.js.map",
-  "runtime~main.js": "/Cube.git/static/js/runtime~main.39d04cd5.js",
-  "runtime~main.js.map": "/Cube.git/static/js/runtime~main.39d04cd5.js.map",
-  "static/js/2.9a59212d.chunk.js": "/Cube.git/static/js/2.9a59212d.chunk.js",
-  "static/js/2.9a59212d.chunk.js.map": "/Cube.git/static/js/2.9a59212d.chunk.js.map",
-  "index.html": "/Cube.git/index.html",
-  "precache-manifest.67a318e764b59bd13c6c9cef0fbb7213.js": "/Cube.git/precache-manifest.67a318e764b59bd13c6c9cef0fbb7213.js",
-  "service-worker.js": "/Cube.git/service-worker.js",
-  "static/css/main.85a4839c.chunk.css.map": "/Cube.git/static/css/main.85a4839c.chunk.css.map"
+  "main.css": "/Cube/static/css/main.85a4839c.chunk.css",
+  "main.js": "/Cube/static/js/main.aaff5ca4.chunk.js",
+  "main.js.map": "/Cube/static/js/main.aaff5ca4.chunk.js.map",
+  "runtime~main.js": "/Cube/static/js/runtime~main.10ec5b03.js",
+  "runtime~main.js.map": "/Cube/static/js/runtime~main.10ec5b03.js.map",
+  "static/js/2.9a59212d.chunk.js": "/Cube/static/js/2.9a59212d.chunk.js",
+  "static/js/2.9a59212d.chunk.js.map": "/Cube/static/js/2.9a59212d.chunk.js.map",
+  "index.html": "/Cube/index.html",
+  "precache-manifest.6bb105ec933edb66f2dc804303626b9a.js": "/Cube/precache-manifest.6bb105ec933edb66f2dc804303626b9a.js",
+  "service-worker.js": "/Cube/service-worker.js",
+  "static/css/main.85a4839c.chunk.css.map": "/Cube/static/css/main.85a4839c.chunk.css.map"
 }
