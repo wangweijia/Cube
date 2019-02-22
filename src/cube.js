@@ -90,8 +90,6 @@ export default class Cube extends Component {
 
     componentDidMount() {
         this.renderCube();
-
-        // this.rotate({x: 1, y: 1, z: 1}, 'x', 0);
     }
 
     cameraPosition(angle1, angle2) {
@@ -179,8 +177,6 @@ export default class Cube extends Component {
     }
 
     initObject(scene) {
-        console.log('---------------initObject(scene)');
-
         let geometry2 = new THREE.CubeGeometry(ItemWidth, ItemWidth, ItemWidth); 
         let material2 = new THREE.MeshBasicMaterial({
             vertexColors: true,
@@ -237,10 +233,8 @@ export default class Cube extends Component {
     }
 
     animation(scene, camera, renderer) {
-        //renderer.clear();
         camera.position.x =camera.position.x +1;
         renderer.render(scene, camera);
-        // requestAnimationFrame(()=>this.animation(scene, camera, renderer));
     }
 
     rotate(point, axle, direction=0) {
@@ -248,9 +242,6 @@ export default class Cube extends Component {
         // direction 0:顺时针， 1:逆时针
 
         let tempItems = [];
-
-
-        console.log('./././././././', point[axle]);
 
         for (let index = 0; index < this.allObjects.length; index++) {
             let element = this.allObjects[index];
@@ -351,196 +342,214 @@ export default class Cube extends Component {
         this.animation(this.scene, this.camera, this.renderer);
     }
 
+    _onMouseDown = (e)=>{
+        //将html坐标系转化为webgl坐标系，并确定鼠标点击位置
+        this.mouse.x =  e.clientX / this.renderer.domElement.clientWidth*2-1;
+        this.mouse.y =  -(e.clientY / this.renderer.domElement.clientHeight*2)+1;
+        //以camera为z坐标，确定所点击物体的3D空间位置
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+        //确定所点击位置上的物体数量
+        let intersects = this.raycaster.intersectObjects(this.scene.children);
+
+        if (intersects.length > 0) {
+            let item = intersects[0];
+            this.cubeItem = item;
+        } else {
+            this.onMouseDown = true;
+
+            this.drx = this.angle1;
+            this.dry = this.angle2;
+        }
+    }
+
+    _onMouseMove = (e)=>{
+        let {clientX, clientY} = e; 
+
+        if (this.cubeItem !== undefined) {
+            //将html坐标系转化为webgl坐标系，并确定鼠标点击位置
+            this.mouse.x =  e.clientX / this.renderer.domElement.clientWidth*2-1;
+            this.mouse.y =  -(e.clientY / this.renderer.domElement.clientHeight*2)+1;
+            //以camera为z坐标，确定所点击物体的3D空间位置
+            this.raycaster.setFromCamera(this.mouse, this.camera);
+            //确定所点击位置上的物体数量
+            let intersects = this.raycaster.intersectObjects(this.scene.children);
+            
+            if (intersects.length > 0) {
+                let tempItem = intersects[0];
+
+                let p = ['x', 'y', 'z'];
+
+                let dx = tempItem.point.x - this.cubeItem.point.x;
+                let dy = tempItem.point.y - this.cubeItem.point.y;
+                let dz = tempItem.point.z - this.cubeItem.point.z;
+
+                let dp = {
+                    'x': dx,
+                    'y': dy,
+                    'z': dz
+                }
+
+                let maxK = undefined;
+                let maxDD = 0;
+                for (let index = 0; index < p.length; index++) {
+                    const aKey = p[index];
+                    let v = Math.abs(dp[aKey]);
+                    maxK = aKey;
+                    maxDD = dp[aKey];
+                    for (let j = index+1; index < p.length; index++) {
+                        const k2 = p[j];
+                        let v2 = Math.abs(dp[k2]);
+                        if (v2 > v) {
+                            maxK = undefined;
+                            maxDD = 0;  
+                            break;
+                        }
+                    }
+                    if (maxK === aKey) {
+                       break; 
+                    }
+                }
+
+                if (Math.abs(maxDD) > ItemWidth/2) {
+                    let points = this.cubeItem.point;
+                    let normalK = undefined;
+                    for (let index = 0; index < p.length; index++) {
+                        const aKey = p[index];
+                        let v = points[aKey];
+                        if (Math.abs(v) >= (1.5*ItemWidth-0.1)) {
+                            normalK = aKey;
+                            break;
+                        }
+                    }
+
+                    let {x, y, z} = this.cubeItem.point;
+
+                    const newPoint = (p) => {
+                        let a = parseInt((Math.abs(p) + ItemWidth/2 - 1) / ItemWidth);
+                        if (p >= 0) {
+                            return a
+                        } else {
+                            return -a;
+                        }
+                    }
+                    let itemx = newPoint(x);
+                    let itemy = newPoint(y);
+                    let itemz = newPoint(z);
+
+                    let point = {x: itemx, y: itemy, z: itemz};
+
+                    let a1 =  p.indexOf(normalK);
+                    if (a1 > -1) {
+                        p.splice(a1, 1);
+                    }
+                    let a2 =  p.indexOf(maxK);
+                    if (a2 > -1) {
+                        p.splice(a2, 1);
+                    }
+                    let axle = p[0];
+
+                    this.cubeItem = undefined;
+
+                    let direction = 0;
+
+                    if (axle === 'x') {
+                        let normalKV = point[normalK];
+                        if ( (normalK === 'y' && normalKV < 0) || (normalK === 'z' && normalKV > 0) ) {
+                            direction = maxDD > 0 ? 1 : 0;
+                        } else {
+                            direction = maxDD > 0 ? 0 : 1;
+                        }
+                    } else if (axle === 'y') {
+                        let normalKV = point[normalK];
+                        if ( (normalK === 'z' && normalKV < 0) || (normalK === 'x' && normalKV > 0) ) {
+                            direction = maxDD > 0 ? 1 : 0;
+                        } else {
+                            direction = maxDD > 0 ? 0 : 1;
+                        }
+                    } else if (axle === 'z') {
+                        let normalKV = point[normalK];
+                        if ( (normalK === 'x' && normalKV < 0) || (normalK === 'y' && normalKV > 0) ) {
+                            direction = maxDD > 0 ? 1 : 0;
+                        } else {
+                            direction = maxDD > 0 ? 0 : 1;
+                        }
+                    }
+
+                    this.rotate(point, axle, direction);
+                }
+            }
+        } else if (this.onMouseDown) {
+            if (this.clientX !== undefined && this.clientY !== undefined) {
+                // 向左为正，向右为负
+                let dx = this.clientX - clientX;
+                // 向上为正，向下为负
+                let dy = this.clientY - clientY;
+
+                this.drx = (this.angle1 + dx / window.innerWidth * 2 * Math.PI) % (2 * Math.PI);
+                this.dry = (this.angle2 + dx / window.innerWidth * 2 * Math.PI) % (2 * Math.PI);
+                // this.dry = this.angle2 -  (Math.PI - dy / window.innerHeight * Math.PI);
+
+                let {x, y, z} = this.cameraPosition(this.drx, this.dry);
+
+                this.camera.position.x = x;
+                this.camera.position.y = y;
+                this.camera.position.z = z;
+
+                this.camera.lookAt(0, 0, 0);
+
+                this.renderer.clear();
+                this.renderer.render(this.scene, this.camera);
+            }
+            // this.clientX = clientX;
+            // this.clientY = clientY;
+        }
+
+        if (this.clientX == undefined || this.clientY == undefined) {
+            this.clientX = clientX;
+            this.clientY = clientY;
+        }
+    }
+
+    _onMouseUp = (e)=>{
+        this.cubeItem = undefined;
+        this.onMouseDown = false;
+        this.clientX = undefined;
+        this.clientY = undefined;
+
+        if (this.drx) {
+            this.angle1 = this.drx;
+        }
+        if (this.dry) {
+            this.angle2 = this.dry;
+        }
+    }
+
     render() {
         return (
             <div id='canvas-frame' style={{
                 width: window.innerWidth,
                 height: window.innerHeight,
-                background: 'red'
-            }} onMouseDown={(e)=>{
-                //将html坐标系转化为webgl坐标系，并确定鼠标点击位置
-                this.mouse.x =  e.clientX / this.renderer.domElement.clientWidth*2-1;
-                this.mouse.y =  -(e.clientY / this.renderer.domElement.clientHeight*2)+1;
-                //以camera为z坐标，确定所点击物体的3D空间位置
-                this.raycaster.setFromCamera(this.mouse, this.camera);
-                //确定所点击位置上的物体数量
-                let intersects = this.raycaster.intersectObjects(this.scene.children);
+            }} 
+            onMouseDown={(e)=>{
+                this._onMouseDown(e);
+            }} 
+            onMouseMove={(e)=>{
+                this._onMouseMove(e);
+            }} 
+            onMouseUp={(e)=>{
+                this._onMouseUp(e);
+            }} 
 
-                if (intersects.length > 0) {
-                    let item = intersects[0];
-                    this.cubeItem = item;
-
-                    console.log(this.cubeItem);
-                } else {
-                    this.onMouseDown = true;
-
-                    this.drx = this.angle1;
-                    this.dry = this.angle2;
-                }
-
-            }} onMouseMove={(e)=>{
-                let {clientX, clientY, pageX, pageY, screenX, screenY} = e; 
-
-                if (this.cubeItem !== undefined) {
-                    //将html坐标系转化为webgl坐标系，并确定鼠标点击位置
-                    this.mouse.x =  e.clientX / this.renderer.domElement.clientWidth*2-1;
-                    this.mouse.y =  -(e.clientY / this.renderer.domElement.clientHeight*2)+1;
-                    //以camera为z坐标，确定所点击物体的3D空间位置
-                    this.raycaster.setFromCamera(this.mouse, this.camera);
-                    //确定所点击位置上的物体数量
-                    let intersects = this.raycaster.intersectObjects(this.scene.children);
-                    
-                    if (intersects.length > 0) {
-                        let tempItem = intersects[0];
-
-                        let p = ['x', 'y', 'z'];
-
-                        let dx = tempItem.point.x - this.cubeItem.point.x;
-                        let dy = tempItem.point.y - this.cubeItem.point.y;
-                        let dz = tempItem.point.z - this.cubeItem.point.z;
-
-                        let dp = {
-                            'x': dx,
-                            'y': dy,
-                            'z': dz
-                        }
-
-                        let maxK = undefined;
-                        let maxDD = 0;
-                        for (let index = 0; index < p.length; index++) {
-                            const aKey = p[index];
-                            let v = Math.abs(dp[aKey]);
-                            maxK = aKey;
-                            maxDD = dp[aKey];
-                            for (let j = index+1; index < p.length; index++) {
-                                const k2 = p[j];
-                                let v2 = Math.abs(dp[k2]);
-                                if (v2 > v) {
-                                    maxK = undefined;
-                                    maxDD = 0;  
-                                    break;
-                                }
-                            }
-                            if (maxK === aKey) {
-                               break; 
-                            }
-                        }
-
-                        if (Math.abs(maxDD) > ItemWidth/2) {
-                            let points = this.cubeItem.point;
-                            let normalK = undefined;
-                            for (let index = 0; index < p.length; index++) {
-                                const aKey = p[index];
-                                let v = points[aKey];
-                                if (Math.abs(v) >= (1.5*ItemWidth-0.1)) {
-                                    normalK = aKey;
-                                    break;
-                                }
-                            }
-
-                            let {x, y, z} = this.cubeItem.point;
-
-                            const newPoint = (p) => {
-                                let a = parseInt((Math.abs(p) + ItemWidth/2 - 1) / ItemWidth);
-                                if (p >= 0) {
-                                    return a
-                                } else {
-                                    return -a;
-                                }
-                            }
-                            let itemx = newPoint(x);
-                            let itemy = newPoint(y);
-                            let itemz = newPoint(z);
-
-                            let point = {x: itemx, y: itemy, z: itemz};
-
-                            let a1 =  p.indexOf(normalK);
-                            if (a1 > -1) {
-                                p.splice(a1, 1);
-                            }
-                            let a2 =  p.indexOf(maxK);
-                            if (a2 > -1) {
-                                p.splice(a2, 1);
-                            }
-                            let axle = p[0];
-
-                            this.cubeItem = undefined;
-
-                            console.log(normalK, maxK, point);
-
-                            let direction = 0;
-
-                            if (axle === 'x') {
-                                let normalKV = point[normalK];
-                                if ( (normalK === 'y' && normalKV < 0) || (normalK === 'z' && normalKV > 0) ) {
-                                    direction = maxDD > 0 ? 1 : 0;
-                                } else {
-                                    direction = maxDD > 0 ? 0 : 1;
-                                }
-                            } else if (axle === 'y') {
-                                let normalKV = point[normalK];
-                                if ( (normalK === 'z' && normalKV < 0) || (normalK === 'x' && normalKV > 0) ) {
-                                    direction = maxDD > 0 ? 1 : 0;
-                                } else {
-                                    direction = maxDD > 0 ? 0 : 1;
-                                }
-                            } else if (axle === 'z') {
-                                let normalKV = point[normalK];
-                                if ( (normalK === 'x' && normalKV < 0) || (normalK === 'y' && normalKV > 0) ) {
-                                    direction = maxDD > 0 ? 1 : 0;
-                                } else {
-                                    direction = maxDD > 0 ? 0 : 1;
-                                }
-                            }
-
-                            this.rotate(point, axle, direction);
-                        }
-                    }
-                } else if (this.onMouseDown) {
-                    if (this.clientX !== undefined && this.clientY !== undefined) {
-                        // 向左为正，向右为负
-                        let dx = this.clientX - clientX;
-                        // 向上为正，向下为负
-                        let dy = this.clientY - clientY;
-
-                        this.drx = (this.angle1 + dx / window.innerWidth * 2 * Math.PI) % (2 * Math.PI);
-                        this.dry = (this.angle2 + dx / window.innerWidth * 2 * Math.PI) % (2 * Math.PI);
-                        // this.dry = this.angle2 -  (Math.PI - dy / window.innerHeight * Math.PI);
-
-                        let {x, y, z} = this.cameraPosition(this.drx, this.dry);
-
-                        this.camera.position.x = x;
-                        this.camera.position.y = y;
-                        this.camera.position.z = z;
-
-                        this.camera.lookAt(0, 0, 0);
-
-                        this.renderer.clear();
-                        this.renderer.render(this.scene, this.camera);
-                    }
-                    // this.clientX = clientX;
-                    // this.clientY = clientY;
-                }
-
-                if (this.clientX == undefined || this.clientY == undefined) {
-                    this.clientX = clientX;
-                    this.clientY = clientY;
-                }
-            }} onMouseUp={()=>{
-                console.log('onMouseUp');
-                this.cubeItem = undefined;
-                this.onMouseDown = false;
-                this.clientX = undefined;
-                this.clientY = undefined;
-
-                if (this.drx) {
-                    this.angle1 = this.drx;
-                }
-                if (this.dry) {
-                    this.angle2 = this.dry;
-                }
-            }} >
-
+            onTouchStart={(e)=>{
+                this._onMouseDown(e.nativeEvent.touches[0]);
+            }}
+            onTouchMove={(e)=>{
+                this._onMouseMove(e.nativeEvent.touches[0]);
+            }}
+            onTouchEnd={(e)=>{
+                this._onMouseUp(e.nativeEvent.touches[0]);
+            }}
+            >
             </div>
         )
     }
